@@ -9,80 +9,80 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MS539___2021_07_07 {
-	public partial class StockPrice : Form {
-		
-		// variable location
-		int random_int;
+    public partial class StockPrice : Form {
+        
+        // variable location
+        int random_int;
 
-		public StockPrice() {
+        public StockPrice() {
 
-			InitializeComponent();
-		}
+            InitializeComponent();
+        }
 
-		private void button1_Click(object sender, EventArgs e) {
+        private void button1_Click(object sender, EventArgs e) {
 
-			MessageBox.Show("something, lol.");
-		}
+            MessageBox.Show("something, lol.");
+        }
 
-		// add_stock button
+        // add_stock button
         private void button4_Click(object sender, EventArgs e)
         {
-			string str = add_box_input.Text;
+            string str = add_box_input.Text;
 
-			foreach (char c in str)
-			{
+            foreach (char c in str)
+            {
 
-				/* debug print for testing validation
-				MessageBox.Show(c.ToString()); */
+                /* debug print for testing validation
+                MessageBox.Show(c.ToString()); */
 
-				if (str.Length <= 0 || str.Length > 4)
-				{
+                if (str.Length <= 0 || str.Length > 4)
+                {
 
-					MessageBox.Show("ticker can only have between 1-4 characters.");
+                    MessageBox.Show("ticker can only have between 1-4 characters.");
 
-					return;
-				}
+                    return;
+                }
 
 
-				if (!char.IsLetter(c))
-				{
+                if (!char.IsLetter(c))
+                {
 
-					MessageBox.Show("ticker should only contain letters.");
+                    MessageBox.Show("ticker should only contain letters.");
 
-					return;
-				}
+                    return;
+                }
 
-			}
+            }
 
-			{
-				MessageBox.Show("Grabbing ticker info from web.");
-			}
+            {
+                MessageBox.Show("Grabbing ticker info from web.");
+            }
 
-		}
+        }
 
-		private void delete_stock_Click(object sender, EventArgs e)
-		{
+        private void delete_stock_Click(object sender, EventArgs e)
+        {
 
-			MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-			DialogResult result;
+            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+            DialogResult result;
 
-			result = MessageBox.Show("are you sure you want to remove the current ticker from the collection?", "confirm action", buttons);
+            result = MessageBox.Show("are you sure you want to remove the current ticker from the collection?", "confirm action", buttons);
 
-			if (result == System.Windows.Forms.DialogResult.Yes)
-			{
-				// place holder message for deletion code
-				MessageBox.Show("ticker removed.");
-			}
+            if (result == System.Windows.Forms.DialogResult.Yes)
+            {
+                // place holder message for deletion code
+                MessageBox.Show("ticker removed.");
+            }
 
-		}
+        }
 
         private void collection_1_Click(object sender, EventArgs e)
         {
 
         }
-		private void button3_Click(object sender, EventArgs e)
-		{
+        private void button3_Click(object sender, EventArgs e)
+        {
 
-		}
-	}
+        }
+    }
 }

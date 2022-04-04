@@ -7,4 +7,9 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="27.2.1" />
+    <PackageReference Include="Microsoft.Chart.Controls" Version="4.7.2046" />
+  </ItemGroup>
+
 </Project>

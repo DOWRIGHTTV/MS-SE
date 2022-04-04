@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Routines = MS539___2021_07_07.Routines;
+
 namespace MS539___2021_07_07 {
     public partial class StockPrice : Form {
         
@@ -38,7 +40,7 @@ namespace MS539___2021_07_07 {
                 if (str.Length <= 0 || str.Length > 4)
                 {
 
-                    MessageBox.Show("ticker can only have between 1-4 characters.");
+                    MessageBox.Show("A stock ticker can only have between 1-4 characters.");
 
                     return;
                 }
@@ -47,17 +49,13 @@ namespace MS539___2021_07_07 {
                 if (!char.IsLetter(c))
                 {
 
-                    MessageBox.Show("ticker should only contain letters.");
+                    MessageBox.Show("A stock ticker should only contain letters.");
 
                     return;
                 }
 
             }
-
-            {
-                MessageBox.Show("Grabbing ticker info from web.");
-            }
-
+            MessageBox.Show("Grabbing ticker info from web.");
         }
 
         private void delete_stock_Click(object sender, EventArgs e)
@@ -75,12 +73,22 @@ namespace MS539___2021_07_07 {
             }
 
         }
+        
+        private void update_Click(object sender, EventArgs e)
+        { }
 
-        private void collection_1_Click(object sender, EventArgs e)
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            ListBox listBox = (ListBox)sender;
 
+            int colNum = listBox.SelectedIndex + 1;
+
+            Routines.StockLoader sL = new Routines.StockLoader();
+
+            sL.load(colNum, "amd");
         }
-        private void button3_Click(object sender, EventArgs e)
+
+        private void add_box_input_TextChanged(object sender, EventArgs e)
         {
 
         }

@@ -19,22 +19,26 @@ namespace MS539___2021_07_07.Routines
         public string collection;
         public string date;
         public string time;
+        public string current;
+        public string dailyLow;
         public string dailyHigh; // this will be implemented later if there is time.
 
-        public StockEntry(string ticker, string collection, string date, string time, string dailyHigh)
+        public StockEntry(string ticker, string collection, string date, string time, string current, string dailyLow, string dailyHigh)
         {
             this.ticker = ticker;
             this.collection = collection;
             this.date = date;
             this.time = time;
+            this.current = current;
+            this.dailyLow = dailyLow;
             this.dailyHigh = dailyHigh;
         }
 
         public string toString()
         {
             return String.Format(
-                "StockEntry(ticker->{0}, collection->{1}, date->{2}, time->{3}, daily_high->{4})", 
-                ticker, collection, date, time, dailyHigh
+                "StockEntry(ticker->{0}, collection->{1}, date->{2}, time->{3}, current->{4}, daily_low->{5}, daily_high->{6})", 
+                ticker, collection, date, time, current, dailyLow, dailyHigh
             );
         }
     }
@@ -43,7 +47,16 @@ namespace MS539___2021_07_07.Routines
     {
         public StockLoader() {}
 
-        public void load(int collection, string ticker)
+        public void iterload(int collection, List<string> tickerList)
+        {
+            List<List<StockEntry>> tickerListData = new List<List<StockEntry>>();
+            foreach (var ticker in tickerList)
+            {
+                tickerListData.Add(load(collection, ticker));
+            }
+        }
+
+        public List<StockEntry> load(int collection, string ticker)
         {
             // C:\Users\dowright\source\repos\MS-SE\Collections\Collection1\
             string stock_file = String.Format(@"../../../Collections/Collection{0}/{1}.csv", collection, ticker);
@@ -61,19 +74,22 @@ namespace MS539___2021_07_07.Routines
             {
                 MessageBox.Show("Could not find the collection. Does it exist?");
 
-                return;
+                return null;
             }
             catch (FileNotFoundException e)
             {
                 MessageBox.Show("Could not find the stock. Does it exist?");
 
-                return;
+                return null;
             }
 
+            // debug only, unless some conversion is necessary later.
             foreach (var entry in entries)
             {
                 Debug.WriteLine(entry.toString());                
             }
+
+            return entries;
         }
     }
 }

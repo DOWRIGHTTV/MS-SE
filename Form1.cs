@@ -19,14 +19,19 @@ namespace MS539___2021_07_07
     {
 
         // variable location
-        ScottPlot.FormsPlot plt;
+        //ScottPlot.FormsPlot plt;
+        StockPlot plotHandler;
 
         public StockPrice()
         {
 
             InitializeComponent();
-            this.plt = formsPlot1;
+
+            // initializing plot handler
+            this.plotHandler = new StockPlot(formsPlot1);
         }
+
+        private void formsPlot1_Load(object sender, EventArgs e) { }
 
         private void add_stock_Click(object sender, EventArgs e)
         {
@@ -86,23 +91,22 @@ namespace MS539___2021_07_07
 
             int colNum = cBox.SelectedIndex + 1;
 
-            // C:\Users\dowright\source\repos\MS-SE\Collections\Collection1\
-            string collection_list = String.Format(@"../../../Collections/Collection{0}/collectionList.txt", colNum);
+            this.plotHandler.clear();
 
-            using var streamReader = File.OpenText(collection_list);
-
-            string[] tickerList = streamReader.ReadToEnd().Split('\n');
-
-            comboTicker.DataSource = tickerList;
+            // ticker list is returned so we can update dropdown
+            comboTicker.DataSource = this.plotHandler.loadCollection(colNum);
         }
 
         private void comboTicker_Change(object sender, EventArgs e)
         {
             int collectionNum = comboCollections.SelectedIndex + 1;
+
             ComboBox cBox = (ComboBox)sender;
+            //string tk = cBox.Text.Trim();
+            int tkIndex = cBox.SelectedIndex;
 
-            string tk = cBox.Text.Trim();
-
+            this.plotHandler.clear();
+            this.plotHandler.plotAndRender(tkIndex);
         }
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
@@ -114,43 +118,98 @@ namespace MS539___2021_07_07
         {
             // S&P 500 reference chart
         }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = (CheckBox)sender;
+
+            if (checkBox.Checked)
+            {
+                this.plotHandler.setSP500(true);
+            } 
+            else
+            {
+                this.plotHandler.setSP500(false);
+            }
+        }
     }
     public class StockPlot
     {
+        private ScottPlot.FormsPlot formPlot;
+        private List<List<Routines.StockEntry>> currentCollection;
 
-        public void plotAndRender()
+        // plt is an instance to the forms graph/plotter.
+        public StockPlot(ScottPlot.FormsPlot plt)
         {
-            Routines.StockLoader sL = new Routines.StockLoader();
-            List<Routines.StockEntry> ticker_points = sL.load(collectionNum, tk);
+            this.formPlot = plt;
 
-            double[] dates = new double[ticker_points.Count];
-            double[] low = new double[ticker_points.Count];
-            double[] high = new double[ticker_points.Count];
-            double[] current = new double[ticker_points.Count];
-            for (int i = 0; i < ticker_points.Count; i++)
+            plt.Plot.XAxis.Label("Time (Days)");
+            plt.Plot.YAxis.Label("Price (Dollars)");
+
+        }
+
+        public void clear()
+        {
+            this.formPlot.Plot.Clear();
+        }
+
+        //public void remove()
+        //{
+        //    this.formPlot.Plot.Remove();
+        //}
+
+        public string[] loadCollection(int collectionNum)
+        {
+            // C:\Users\dowright\source\repos\MS-SE\Collections\Collection1\
+            string collection_list = String.Format(@"../../../Collections/Collection{0}/collectionList.txt", collectionNum);
+
+            using var streamReader = File.OpenText(collection_list);
+
+            string[] tickerList = streamReader.ReadToEnd().Split('\n');
+
+            Routines.StockLoader sL = new Routines.StockLoader();
+            this.currentCollection = sL.iterload(collectionNum, tickerList);
+
+            return tickerList;
+        }
+
+        public void plotAndRender(int tkIndex)
+        {
+            List<Routines.StockEntry> prices = this.currentCollection[tkIndex];
+
+            double[] dates = new double[prices.Count];
+            double[] low = new double[prices.Count];
+            double[] high = new double[prices.Count];
+            double[] current = new double[prices.Count];
+            for (int i = 0; i < prices.Count; i++)
             {
-                dates[i] = DateTime.Parse(ticker_points[i].date).ToOADate();
-                low[i] = float.Parse(ticker_points[i].dailyLow, CultureInfo.InvariantCulture.NumberFormat);
-                high[i] = float.Parse(ticker_points[i].dailyHigh, CultureInfo.InvariantCulture.NumberFormat);
-                current[i] = float.Parse(ticker_points[i].current);
-                Debug.WriteLine(ticker_points[i].toString());
+                dates[i] = DateTime.Parse(prices[i].date).ToOADate();
+                //dates[i] = DateTime.ParseExact(prices[i].date, "yyyyMMdd", CultureInfo.InvariantCulture).ToOADate();
+                low[i] = float.Parse(prices[i].dailyLow, CultureInfo.InvariantCulture.NumberFormat);
+                high[i] = float.Parse(prices[i].dailyHigh, CultureInfo.InvariantCulture.NumberFormat);
+                current[i] = float.Parse(prices[i].current);
+                //Debug.WriteLine(prices[i].toString());
             }
 
-            plt.Plot.AddScatter(dates, low);
-            plt.Plot.AddScatter(dates, high);
-            plt.Plot.AddScatter(dates, current);
+            this.formPlot.Plot.AddScatter(dates, low);
+            this.formPlot.Plot.AddScatter(dates, high);
+            this.formPlot.Plot.AddScatter(dates, current);
             //plt.Plot.GetPlottables();
-            plt.Plot.XAxis.DateTimeFormat(true);
+            this.formPlot.Plot.XAxis.DateTimeFormat(true);
 
             // define tick spacing as 1 day (every day will be shown)
-            //plt.Plot.XAxis.ManualTickSpacing(1, ScottPlot.Ticks.DateTimeUnit.Day);
+            //this.formPlot.Plot.XAxis.ManualTickSpacing(1, ScottPlot.Ticks.DateTimeUnit.Day);
             //plt.Plot.XAxis.TickLabelStyle(rotation: 45);
 
             // add some extra space for rotated ticks
-            plt.Plot.XAxis.SetSizeLimit(min: 50);
+            this.formPlot.Plot.XAxis.SetSizeLimit(min: 50);
 
-            plt.Render();
+            this.formPlot.Render();
         }
 
+        public void setSP500(bool show)
+        {
+            return;
+        }
     }
 }

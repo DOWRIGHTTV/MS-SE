@@ -47,19 +47,21 @@ namespace MS539___2021_07_07.Routines
     {
         public StockLoader() {}
 
-        public void iterload(int collection, List<string> tickerList)
+        public List<List<StockEntry>> iterload(int collection, string[] tickerList)
         {
             List<List<StockEntry>> tickerListData = new List<List<StockEntry>>();
             foreach (var ticker in tickerList)
             {
                 tickerListData.Add(load(collection, ticker));
             }
+
+            return tickerListData;
         }
 
         public List<StockEntry> load(int collection, string ticker)
         {
             // C:\Users\dowright\source\repos\MS-SE\Collections\Collection1\
-            string stock_file = String.Format(@"../../../Collections/Collection{0}/{1}.csv", collection, ticker);
+            string stock_file = String.Format(@"../../../Collections/Collection{0}/{1}.csv", collection, ticker.Trim());
 
             List<StockEntry> entries;
             try
@@ -82,12 +84,19 @@ namespace MS539___2021_07_07.Routines
 
                 return null;
             }
+            catch (IOException e)
+            {
+                MessageBox.Show(String.Format("[{0}] big bada boom.", ticker));
+
+                return null;
+            }
+
 
             // debug only, unless some conversion is necessary later.
-            foreach (var entry in entries)
-            {
-                Debug.WriteLine(entry.toString());                
-            }
+            //foreach (var entry in entries)
+            //{
+            //    Debug.WriteLine(entry.toString());                
+            //}
 
             return entries;
         }

@@ -95,6 +95,9 @@ namespace MS539___2021_07_07
 
             // ticker list is returned so we can update dropdown
             comboTicker.DataSource = this.plotHandler.loadCollection(colNum);
+
+            // 30 days will be default so we need to ensure it is checked appropriately
+            view30.Checked = true;
         }
 
         private void comboTicker_Change(object sender, EventArgs e)
@@ -106,12 +109,31 @@ namespace MS539___2021_07_07
             int tkIndex = cBox.SelectedIndex;
 
             this.plotHandler.clear();
-            this.plotHandler.plotAndRender(tkIndex);
+            this.plotHandler.loadTicker(tkIndex);
+            this.plotHandler.render();
         }
 
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        private void view_CheckedChanged(object sender, EventArgs e)
         {
 
+            RadioButton radio = (RadioButton)sender;
+
+            int offset;
+
+            // this filters out the unchecked radio from executing code.
+            if (!radio.Checked) { return; }
+
+            if (view30.Checked) { offset = 30; }
+            else if (view60.Checked) { offset = 60; }
+            else if (view90.Checked) { offset = 90; }
+            else if (view352.Checked) { offset = 352; }
+            else { return; }
+
+            this.plotHandler.timeLimit = offset;
+
+            this.plotHandler.clear();
+            this.plotHandler.loadTicker(comboTicker.SelectedIndex);
+            this.plotHandler.render();
         }
 
         private void referenceRadio1(object sender, EventArgs e)
@@ -122,6 +144,8 @@ namespace MS539___2021_07_07
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox checkBox = (CheckBox)sender;
+
+            Debug.WriteLine(String.Format("setting sp500 to > {0}", checkBox.Checked));
 
             if (checkBox.Checked)
             {
@@ -137,6 +161,18 @@ namespace MS539___2021_07_07
     {
         private ScottPlot.FormsPlot formPlot;
         private List<List<Routines.StockEntry>> currentCollection;
+        private Routines.StockLoader stockLoader;
+
+        private List<ScottPlot.Plottable.ScatterPlot> stockPlots;
+        private List<bool> stockfieldSet;
+
+
+        private List<List<Routines.StockReference>> stockReferenceData = new List<List<Routines.StockReference>> { };
+        private List<ScottPlot.Plottable.ScatterPlot> stockReferencePlots = new List<ScottPlot.Plottable.ScatterPlot> { };
+        private List<bool> stockReferenceSet = new List<bool> { };
+
+        public int timeLimit { get; set; } = 30;
+
 
         // plt is an instance to the forms graph/plotter.
         public StockPlot(ScottPlot.FormsPlot plt)
@@ -146,11 +182,23 @@ namespace MS539___2021_07_07
             plt.Plot.XAxis.Label("Time (Days)");
             plt.Plot.YAxis.Label("Price (Dollars)");
 
+            this.stockLoader = new Routines.StockLoader();
+
+            // loading reference data
+            this.stockReferenceData.Add(this.stockLoader.loadReference("sp500"));
+
+            // this will let show method know to create the plottable.
+            this.stockReferenceSet.Add(false);
         }
 
         public void clear()
         {
             this.formPlot.Plot.Clear();
+        }
+
+        public void render()
+        {
+            this.formPlot.Render();
         }
 
         //public void remove()
@@ -167,28 +215,34 @@ namespace MS539___2021_07_07
 
             string[] tickerList = streamReader.ReadToEnd().Split('\n');
 
-            Routines.StockLoader sL = new Routines.StockLoader();
-            this.currentCollection = sL.iterload(collectionNum, tickerList);
+            this.currentCollection = this.stockLoader.iterload(collectionNum, tickerList);
 
             return tickerList;
         }
 
-        public void plotAndRender(int tkIndex)
+        public void loadTicker(int tkIndex)
         {
             List<Routines.StockEntry> prices = this.currentCollection[tkIndex];
 
-            double[] dates = new double[prices.Count];
-            double[] low = new double[prices.Count];
-            double[] high = new double[prices.Count];
-            double[] current = new double[prices.Count];
-            for (int i = 0; i < prices.Count; i++)
+            Debug.WriteLine(String.Format("current time limit > {0}", this.timeLimit));
+
+            int ITER_PTR;
+            int time = this.timeLimit;
+            if (time > prices.Count) { ITER_PTR = 0; time = prices.Count; }
+            else { ITER_PTR = prices.Count - time; }
+
+            double[] dates = new double[time];
+            double[] low = new double[time];
+            double[] high = new double[time];
+            double[] current = new double[time];
+            for (int i = 0; i < time; i++)
             {
-                dates[i] = DateTime.Parse(prices[i].date).ToOADate();
-                //dates[i] = DateTime.ParseExact(prices[i].date, "yyyyMMdd", CultureInfo.InvariantCulture).ToOADate();
-                low[i] = float.Parse(prices[i].dailyLow, CultureInfo.InvariantCulture.NumberFormat);
-                high[i] = float.Parse(prices[i].dailyHigh, CultureInfo.InvariantCulture.NumberFormat);
-                current[i] = float.Parse(prices[i].current);
+                dates[i] = DateTime.Parse(prices[ITER_PTR].date).ToOADate();
+                low[i] = float.Parse(prices[ITER_PTR].dailyLow, CultureInfo.InvariantCulture.NumberFormat);
+                high[i] = float.Parse(prices[ITER_PTR].dailyHigh, CultureInfo.InvariantCulture.NumberFormat);
+                current[i] = float.Parse(prices[ITER_PTR].current);
                 //Debug.WriteLine(prices[i].toString());
+                ITER_PTR++;
             }
 
             this.formPlot.Plot.AddScatter(dates, low);
@@ -199,17 +253,61 @@ namespace MS539___2021_07_07
 
             // define tick spacing as 1 day (every day will be shown)
             //this.formPlot.Plot.XAxis.ManualTickSpacing(1, ScottPlot.Ticks.DateTimeUnit.Day);
-            //plt.Plot.XAxis.TickLabelStyle(rotation: 45);
+        }
 
-            // add some extra space for rotated ticks
-            this.formPlot.Plot.XAxis.SetSizeLimit(min: 50);
+        private void referencePlot(int refIndex)
+        {
+            List<Routines.StockReference> prices = this.stockReferenceData[refIndex];
 
-            this.formPlot.Render();
+            int ITER_PTR;
+            int time = this.timeLimit;
+            if (time > prices.Count) { ITER_PTR = 0; time = prices.Count; }
+            else { ITER_PTR = prices.Count - time; }
+
+            double[] dates = new double[time];
+            double[] price = new double[time];
+            for (int i = 0; i < time; i++)
+            {
+                dates[i] = DateTime.Parse(prices[ITER_PTR].date).ToOADate();
+                price[i] = float.Parse(prices[ITER_PTR].price, CultureInfo.InvariantCulture.NumberFormat);
+            }
+
+            ScottPlot.Plottable.ScatterPlot refPlot = new ScottPlot.Plottable.ScatterPlot(dates, price);
+
+            //this.formPlot.Plot.Add(refPlot);
+            this.formPlot.Plot.AddScatter(dates, price);
+
+            this.stockReferencePlots.Insert(0, refPlot);
+            this.stockReferenceSet[0] = true;
         }
 
         public void setSP500(bool show)
         {
-            return;
+            if (show)
+            {
+                // lazy build the plot since it has not been done yet.
+                if (!this.stockReferenceSet[0])
+                {
+                    Debug.WriteLine("building reference plot");
+                    this.referencePlot(0);
+                }
+
+                //Debug.WriteLine("adding plottable");
+                //this.clear();
+                //this.formPlot.Plot.Add(this.stockReferencePlots[0]);
+            }
+            else
+            {
+                if (this.stockReferenceSet[0])
+                {
+                    Debug.WriteLine("removing plottable");
+                    this.formPlot.Plot.Remove(this.stockReferencePlots[0]);
+                }
+            }
+
+            // re render the change to plots.
+            Debug.WriteLine("re rendering ref.");
+            this.render();
         }
     }
 }

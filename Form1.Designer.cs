@@ -40,10 +40,10 @@ namespace MS539___2021_07_07
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.comboTicker = new System.Windows.Forms.ComboBox();
             this.comboCollections = new System.Windows.Forms.ComboBox();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.radioButton3 = new System.Windows.Forms.RadioButton();
-            this.radioButton4 = new System.Windows.Forms.RadioButton();
+            this.view30 = new System.Windows.Forms.RadioButton();
+            this.view60 = new System.Windows.Forms.RadioButton();
+            this.view90 = new System.Windows.Forms.RadioButton();
+            this.view352 = new System.Windows.Forms.RadioButton();
             this.radioButton5 = new System.Windows.Forms.RadioButton();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -137,48 +137,51 @@ namespace MS539___2021_07_07
             // 
             // radioButton1
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(1238, 169);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(92, 27);
-            this.radioButton1.TabIndex = 17;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "30 Days";
-            this.radioButton1.UseVisualStyleBackColor = true;
-            this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+            this.view30.AutoSize = true;
+            this.view30.Location = new System.Drawing.Point(1238, 169);
+            this.view30.Name = "view30";
+            this.view30.Size = new System.Drawing.Size(92, 27);
+            this.view30.TabIndex = 17;
+            this.view30.TabStop = true;
+            this.view30.Text = "30 Days";
+            this.view30.UseVisualStyleBackColor = true;
+            this.view30.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
             // 
             // radioButton2
             // 
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(1336, 169);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(92, 27);
-            this.radioButton2.TabIndex = 18;
-            this.radioButton2.TabStop = true;
-            this.radioButton2.Text = "60 Days";
-            this.radioButton2.UseVisualStyleBackColor = true;
+            this.view60.AutoSize = true;
+            this.view60.Location = new System.Drawing.Point(1336, 169);
+            this.view60.Name = "view60";
+            this.view60.Size = new System.Drawing.Size(92, 27);
+            this.view60.TabIndex = 18;
+            this.view60.TabStop = true;
+            this.view60.Text = "60 Days";
+            this.view60.UseVisualStyleBackColor = true;
+            this.view60.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
             // 
             // radioButton3
             // 
-            this.radioButton3.AutoSize = true;
-            this.radioButton3.Location = new System.Drawing.Point(1434, 169);
-            this.radioButton3.Name = "radioButton3";
-            this.radioButton3.Size = new System.Drawing.Size(92, 27);
-            this.radioButton3.TabIndex = 19;
-            this.radioButton3.TabStop = true;
-            this.radioButton3.Text = "90 Days";
-            this.radioButton3.UseVisualStyleBackColor = true;
+            this.view90.AutoSize = true;
+            this.view90.Location = new System.Drawing.Point(1434, 169);
+            this.view90.Name = "view90";
+            this.view90.Size = new System.Drawing.Size(92, 27);
+            this.view90.TabIndex = 19;
+            this.view90.TabStop = true;
+            this.view90.Text = "90 Days";
+            this.view90.UseVisualStyleBackColor = true;
+            this.view90.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
             // 
             // radioButton4
             // 
-            this.radioButton4.AutoSize = true;
-            this.radioButton4.Location = new System.Drawing.Point(1532, 169);
-            this.radioButton4.Name = "radioButton4";
-            this.radioButton4.Size = new System.Drawing.Size(61, 27);
-            this.radioButton4.TabIndex = 20;
-            this.radioButton4.TabStop = true;
-            this.radioButton4.Text = "1 YR";
-            this.radioButton4.UseVisualStyleBackColor = true;
+            this.view352.AutoSize = true;
+            this.view352.Location = new System.Drawing.Point(1532, 169);
+            this.view352.Name = "view352";
+            this.view352.Size = new System.Drawing.Size(61, 27);
+            this.view352.TabIndex = 20;
+            this.view352.TabStop = true;
+            this.view352.Text = "1 YR";
+            this.view352.UseVisualStyleBackColor = true;
+            this.view352.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
             // 
             // radioButton5
             // 
@@ -225,10 +228,10 @@ namespace MS539___2021_07_07
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.radioButton5);
-            this.Controls.Add(this.radioButton4);
-            this.Controls.Add(this.radioButton3);
-            this.Controls.Add(this.radioButton2);
-            this.Controls.Add(this.radioButton1);
+            this.Controls.Add(this.view30);
+            this.Controls.Add(this.view60);
+            this.Controls.Add(this.view90);
+            this.Controls.Add(this.view352);
             this.Controls.Add(this.comboCollections);
             this.Controls.Add(this.comboTicker);
             this.Controls.Add(this.formsPlot1);
@@ -264,10 +267,10 @@ namespace MS539___2021_07_07
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.ComboBox comboCollections;
         private System.Windows.Forms.ComboBox comboTicker;
-        private System.Windows.Forms.RadioButton radioButton1;
-        private System.Windows.Forms.RadioButton radioButton4;
-        private System.Windows.Forms.RadioButton radioButton3;
-        private System.Windows.Forms.RadioButton radioButton2;
+        private System.Windows.Forms.RadioButton view30;
+        private System.Windows.Forms.RadioButton view60;
+        private System.Windows.Forms.RadioButton view90;
+        private System.Windows.Forms.RadioButton view352;
         private System.Windows.Forms.RadioButton radioButton5;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;

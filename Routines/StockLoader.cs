@@ -15,32 +15,28 @@ namespace MS539___2021_07_07.Routines
     // data class to represent a single stock entry
     class StockEntry
     {
-        public string ticker;
-        public string collection;
-        public string date;
-        public string time;
-        public string current;
-        public string dailyLow;
-        public string dailyHigh; // this will be implemented later if there is time.
-
-        public StockEntry(string ticker, string collection, string date, string time, string current, string dailyLow, string dailyHigh)
-        {
-            this.ticker = ticker;
-            this.collection = collection;
-            this.date = date;
-            this.time = time;
-            this.current = current;
-            this.dailyLow = dailyLow;
-            this.dailyHigh = dailyHigh;
-        }
+        public string ticker { get; set; }
+        public string collection { get; set; }
+        public string date { get; set; }
+        public string time { get; set; }
+        public string current { get; set; }
+        public string dailyLow { get; set; }
+        public string dailyHigh { get; set; } // this will be implemented later if there is time.
 
         public string toString()
         {
             return String.Format(
                 "StockEntry(ticker->{0}, collection->{1}, date->{2}, time->{3}, current->{4}, daily_low->{5}, daily_high->{6})", 
-                ticker, collection, date, time, current, dailyLow, dailyHigh
+                this.ticker, this.collection, this.date, this.time, this.current, this.dailyLow, this.dailyHigh
             );
         }
+    }
+
+    class StockReference
+    {
+        public string name { get; set; }
+        public string date { get; set; }
+        public string price { get; set; }
     }
 
     class StockLoader
@@ -97,6 +93,20 @@ namespace MS539___2021_07_07.Routines
             //{
             //    Debug.WriteLine(entry.toString());                
             //}
+
+            return entries;
+        }
+
+        public List<StockReference> loadReference(string name)
+        {
+            string ref_file = String.Format(@"../../../References/{0}_ref.csv", name);
+
+            List<StockReference> entries;
+
+            using var streamReader = File.OpenText(ref_file);
+            using var csvReader = new CsvReader(streamReader, CultureInfo.CurrentCulture);
+
+            entries = csvReader.GetRecords<StockReference>().ToList();
 
             return entries;
         }

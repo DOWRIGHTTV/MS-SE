@@ -21,7 +21,7 @@ namespace MS539___2021_07_07.Routines
         public string time { get; set; }
         public string current { get; set; }
         public string dailyLow { get; set; }
-        public string dailyHigh { get; set; } // this will be implemented later if there is time.
+        public string dailyHigh { get; set; }
 
         public string toString()
         {
@@ -107,6 +107,8 @@ namespace MS539___2021_07_07.Routines
             using var csvReader = new CsvReader(streamReader, CultureInfo.CurrentCulture);
 
             entries = csvReader.GetRecords<StockReference>().ToList();
+
+            Debug.WriteLine(entries.Count);
 
             return entries;
         }

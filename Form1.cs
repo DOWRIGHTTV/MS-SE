@@ -24,11 +24,13 @@ namespace MS539___2021_07_07
 
         public StockPrice()
         {
-
             InitializeComponent();
 
             // initializing plot handler
             this.plotHandler = new StockPlot(formsPlot1);
+
+            // formatting to show dates on x axis
+            formsPlot1.Plot.XAxis.DateTimeFormat(true);
         }
 
         private void formsPlot1_Load(object sender, EventArgs e) { }
@@ -75,7 +77,6 @@ namespace MS539___2021_07_07
                 // place holder message for deletion code
                 MessageBox.Show("ticker removed.");
             }
-
         }
 
         private void update_Click(object sender, EventArgs e) { }
@@ -93,11 +94,19 @@ namespace MS539___2021_07_07
 
             this.plotHandler.clear();
 
-            // ticker list is returned so we can update dropdown
+            // swap out current collection list with the newly selected
             comboTicker.DataSource = this.plotHandler.loadCollection(colNum);
 
             // 30 days will be default so we need to ensure it is checked appropriately
             view30.Checked = true;
+
+            // all plots shown in default view
+            low_price.Checked = true;
+            current_price.Checked = true;
+            high_price.Checked = true;
+
+            // all refs hidden in default view
+            SP500.Checked = false;
         }
 
         private void comboTicker_Change(object sender, EventArgs e)
@@ -105,56 +114,74 @@ namespace MS539___2021_07_07
             int collectionNum = comboCollections.SelectedIndex + 1;
 
             ComboBox cBox = (ComboBox)sender;
-            //string tk = cBox.Text.Trim();
+
             int tkIndex = cBox.SelectedIndex;
 
-            this.plotHandler.clear();
-            this.plotHandler.loadTicker(tkIndex);
+            bool[] enabledPlots = new bool[] { low_price.Checked, current_price.Checked, high_price.Checked };
+
+            this.plotHandler.clear(true);
+            this.plotHandler.loadTicker(tkIndex, enabledPlots);
             this.plotHandler.render();
         }
 
-        private void view_CheckedChanged(object sender, EventArgs e)
+        private void view_Clicked(object sender, EventArgs e)
         {
-
             RadioButton radio = (RadioButton)sender;
 
-            int offset;
+            // this will protect the app from trying to load tickers for an unused/empty collection
+            if (comboTicker.DataSource == null)
+            {
+                radio.Checked = false;
+                return; 
+            }
 
-            // this filters out the unchecked radio from executing code.
-            if (!radio.Checked) { return; }
+            // hijacking this property to quick assign values based on sender object
+            int offset = radio.ImageIndex;
 
-            if (view30.Checked) { offset = 30; }
-            else if (view60.Checked) { offset = 60; }
-            else if (view90.Checked) { offset = 90; }
-            else if (view352.Checked) { offset = 352; }
-            else { return; }
+            bool[] enabledPlots = new bool[] { low_price.Checked, current_price.Checked, high_price.Checked };
 
             this.plotHandler.timeLimit = offset;
 
             this.plotHandler.clear();
-            this.plotHandler.loadTicker(comboTicker.SelectedIndex);
+            this.plotHandler.loadTicker(comboTicker.SelectedIndex, enabledPlots);
             this.plotHandler.render();
         }
 
-        private void referenceRadio1(object sender, EventArgs e)
+        private void ref1_Clicked(object sender, EventArgs e)
         {
-            // S&P 500 reference chart
+            CheckBox cBox = (CheckBox)sender;
+
+            // if collection isnt loaded, force uncheck (default) and return
+            if (comboTicker.DataSource == null)
+            {
+                cBox.Checked = false;
+                return;
+            }
+
+            Debug.WriteLine("ref clicked");
+
+            if (cBox.Checked) { this.plotHandler.addRef(0); }
+
+            else { this.plotHandler.removeRef(0); }
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void price_Clicked(object sender, EventArgs e)
         {
-            CheckBox checkBox = (CheckBox)sender;
+            CheckBox cBox = (CheckBox)sender;
 
-            Debug.WriteLine(String.Format("setting sp500 to > {0}", checkBox.Checked));
-
-            if (checkBox.Checked)
+            // if collection isnt loaded, force check (default) and return
+            if (comboTicker.DataSource == null)
             {
-                this.plotHandler.setSP500(true);
-            } 
-            else
-            {
-                this.plotHandler.setSP500(false);
+                cBox.Checked = false;
+                return;
             }
+
+            // hijacking this property to quick assign values based on sender object
+            int plotIndex = cBox.ImageIndex;
+
+            if (cBox.Checked) { this.plotHandler.add(plotIndex); }
+
+            else { this.plotHandler.remove(plotIndex); }
         }
     }
     public class StockPlot
@@ -163,13 +190,11 @@ namespace MS539___2021_07_07
         private List<List<Routines.StockEntry>> currentCollection;
         private Routines.StockLoader stockLoader;
 
-        private List<ScottPlot.Plottable.ScatterPlot> stockPlots;
-        private List<bool> stockfieldSet;
+        private List<ScottPlot.Plottable.ScatterPlot> stockPlots = new List<ScottPlot.Plottable.ScatterPlot> { };
 
-
-        private List<List<Routines.StockReference>> stockReferenceData = new List<List<Routines.StockReference>> { };
         private List<ScottPlot.Plottable.ScatterPlot> stockReferencePlots = new List<ScottPlot.Plottable.ScatterPlot> { };
-        private List<bool> stockReferenceSet = new List<bool> { };
+        private List<List<Routines.StockReference>> stockReferenceData = new List<List<Routines.StockReference>> { };
+        private String[] refMap = new String[] { "sp500" };
 
         public int timeLimit { get; set; } = 30;
 
@@ -184,16 +209,23 @@ namespace MS539___2021_07_07
 
             this.stockLoader = new Routines.StockLoader();
 
-            // loading reference data
-            this.stockReferenceData.Add(this.stockLoader.loadReference("sp500"));
-
-            // this will let show method know to create the plottable.
-            this.stockReferenceSet.Add(false);
+            // SP500
+            this.stockReferenceData.Insert(0, this.stockLoader.loadReference("sp500"));
+            this.loadReference(0);
         }
 
-        public void clear()
+        public void clear(bool skipRefs=false)
         {
-            this.formPlot.Plot.Clear();
+            if (this.stockPlots.Count == 0) { return; }
+
+            this.formPlot.Plot.Remove(this.stockPlots[0]);
+            this.formPlot.Plot.Remove(this.stockPlots[1]);
+            this.formPlot.Plot.Remove(this.stockPlots[2]);
+
+            if (!skipRefs)
+            {
+                this.formPlot.Plot.Remove(this.stockReferencePlots[0]);
+            }
         }
 
         public void render()
@@ -201,30 +233,47 @@ namespace MS539___2021_07_07
             this.formPlot.Render();
         }
 
-        //public void remove()
-        //{
-        //    this.formPlot.Plot.Remove();
-        //}
+        public void add(int plotIdx)
+        {
+            this.formPlot.Plot.Add(stockPlots[plotIdx]);
+
+            this.render();
+        }
+
+        public void remove(int plotIdx)
+        {
+            this.formPlot.Plot.Remove(stockPlots[plotIdx]);
+
+            this.render();
+        }
 
         public string[] loadCollection(int collectionNum)
         {
             // C:\Users\dowright\source\repos\MS-SE\Collections\Collection1\
             string collection_list = String.Format(@"../../../Collections/Collection{0}/collectionList.txt", collectionNum);
 
-            using var streamReader = File.OpenText(collection_list);
+            string[] tickerList;
+            try
+            {
+                using var streamReader = File.OpenText(collection_list);
 
-            string[] tickerList = streamReader.ReadToEnd().Split('\n');
+                tickerList = streamReader.ReadToEnd().Split('\n');
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                MessageBox.Show("Could not find the collection. Does it exist?");
+
+                return null;
+            }
 
             this.currentCollection = this.stockLoader.iterload(collectionNum, tickerList);
 
             return tickerList;
         }
 
-        public void loadTicker(int tkIndex)
+        public void loadTicker(int tkIndex, bool[] enabledPlots)
         {
             List<Routines.StockEntry> prices = this.currentCollection[tkIndex];
-
-            Debug.WriteLine(String.Format("current time limit > {0}", this.timeLimit));
 
             int ITER_PTR;
             int time = this.timeLimit;
@@ -232,30 +281,44 @@ namespace MS539___2021_07_07
             else { ITER_PTR = prices.Count - time; }
 
             double[] dates = new double[time];
+            double[] current = new double[time];
             double[] low = new double[time];
             double[] high = new double[time];
-            double[] current = new double[time];
             for (int i = 0; i < time; i++)
             {
                 dates[i] = DateTime.Parse(prices[ITER_PTR].date).ToOADate();
                 low[i] = float.Parse(prices[ITER_PTR].dailyLow, CultureInfo.InvariantCulture.NumberFormat);
-                high[i] = float.Parse(prices[ITER_PTR].dailyHigh, CultureInfo.InvariantCulture.NumberFormat);
                 current[i] = float.Parse(prices[ITER_PTR].current);
+                high[i] = float.Parse(prices[ITER_PTR].dailyHigh, CultureInfo.InvariantCulture.NumberFormat);
                 //Debug.WriteLine(prices[i].toString());
                 ITER_PTR++;
             }
+            // low
+            var scatterLow = new ScottPlot.Plottable.ScatterPlot(dates, low);
+            scatterLow.Color = Color.Red;
+            scatterLow.MarkerSize = 10;
 
-            this.formPlot.Plot.AddScatter(dates, low);
-            this.formPlot.Plot.AddScatter(dates, high);
-            this.formPlot.Plot.AddScatter(dates, current);
-            //plt.Plot.GetPlottables();
-            this.formPlot.Plot.XAxis.DateTimeFormat(true);
+            stockPlots.Insert(0, scatterLow);
+            if (enabledPlots[0]) { this.formPlot.Plot.Add(scatterLow); }
+            
+            // current
+            var scatterCurrent = new ScottPlot.Plottable.ScatterPlot(dates, current);
+            scatterCurrent.Color = Color.Black;
+            scatterCurrent.MarkerSize = 10;
 
-            // define tick spacing as 1 day (every day will be shown)
-            //this.formPlot.Plot.XAxis.ManualTickSpacing(1, ScottPlot.Ticks.DateTimeUnit.Day);
+            stockPlots.Insert(1, scatterCurrent);
+            if (enabledPlots[1]) { this.formPlot.Plot.Add(scatterCurrent); }
+
+            // high
+            var scatterHigh = new ScottPlot.Plottable.ScatterPlot(dates, high);
+            scatterHigh.Color = Color.Green;
+            scatterHigh.MarkerSize = 10;
+
+            stockPlots.Insert(2, scatterHigh);
+            if (enabledPlots[2]) { this.formPlot.Plot.Add(scatterHigh); }
         }
 
-        private void referencePlot(int refIndex)
+        private void loadReference(int refIndex)
         {
             List<Routines.StockReference> prices = this.stockReferenceData[refIndex];
 
@@ -270,43 +333,26 @@ namespace MS539___2021_07_07
             {
                 dates[i] = DateTime.Parse(prices[ITER_PTR].date).ToOADate();
                 price[i] = float.Parse(prices[ITER_PTR].price, CultureInfo.InvariantCulture.NumberFormat);
+
+                Debug.WriteLine(price[i]);
             }
 
-            ScottPlot.Plottable.ScatterPlot refPlot = new ScottPlot.Plottable.ScatterPlot(dates, price);
+            var scatterRef = new ScottPlot.Plottable.ScatterPlot(dates, price);
+            scatterRef.Color = Color.Blue;
+            scatterRef.MarkerSize = 5;
 
-            //this.formPlot.Plot.Add(refPlot);
-            this.formPlot.Plot.AddScatter(dates, price);
-
-            this.stockReferencePlots.Insert(0, refPlot);
-            this.stockReferenceSet[0] = true;
+            this.stockReferencePlots.Insert(0, scatterRef);
         }
 
-        public void setSP500(bool show)
+        public void addRef(int refIndex)
         {
-            if (show)
-            {
-                // lazy build the plot since it has not been done yet.
-                if (!this.stockReferenceSet[0])
-                {
-                    Debug.WriteLine("building reference plot");
-                    this.referencePlot(0);
-                }
+            this.formPlot.Plot.Add(this.stockReferencePlots[refIndex]);
+            this.render();
+        }
 
-                //Debug.WriteLine("adding plottable");
-                //this.clear();
-                //this.formPlot.Plot.Add(this.stockReferencePlots[0]);
-            }
-            else
-            {
-                if (this.stockReferenceSet[0])
-                {
-                    Debug.WriteLine("removing plottable");
-                    this.formPlot.Plot.Remove(this.stockReferencePlots[0]);
-                }
-            }
-
-            // re render the change to plots.
-            Debug.WriteLine("re rendering ref.");
+        public void removeRef(int refIndex)
+        {
+            this.formPlot.Plot.Remove(this.stockReferencePlots[refIndex]);
             this.render();
         }
     }

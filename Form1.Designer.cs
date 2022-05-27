@@ -145,6 +145,7 @@ namespace MS539___2021_07_07
             // view30
             // 
             this.view30.AutoSize = true;
+            this.view30.ImageIndex = 30;
             this.view30.Location = new System.Drawing.Point(1238, 169);
             this.view30.Name = "view30";
             this.view30.Size = new System.Drawing.Size(92, 27);
@@ -152,12 +153,12 @@ namespace MS539___2021_07_07
             this.view30.TabStop = true;
             this.view30.Text = "30 Days";
             this.view30.UseVisualStyleBackColor = true;
-            this.view30.ImageIndex = 30;
             this.view30.Click += new System.EventHandler(this.view_Clicked);
             // 
             // view60
             // 
             this.view60.AutoSize = true;
+            this.view60.ImageIndex = 60;
             this.view60.Location = new System.Drawing.Point(1336, 169);
             this.view60.Name = "view60";
             this.view60.Size = new System.Drawing.Size(92, 27);
@@ -165,12 +166,12 @@ namespace MS539___2021_07_07
             this.view60.TabStop = true;
             this.view60.Text = "60 Days";
             this.view60.UseVisualStyleBackColor = true;
-            this.view60.ImageIndex = 60;
             this.view60.Click += new System.EventHandler(this.view_Clicked);
             // 
             // view90
             // 
             this.view90.AutoSize = true;
+            this.view90.ImageIndex = 90;
             this.view90.Location = new System.Drawing.Point(1434, 169);
             this.view90.Name = "view90";
             this.view90.Size = new System.Drawing.Size(92, 27);
@@ -178,12 +179,12 @@ namespace MS539___2021_07_07
             this.view90.TabStop = true;
             this.view90.Text = "90 Days";
             this.view90.UseVisualStyleBackColor = true;
-            this.view90.ImageIndex = 90;
             this.view90.Click += new System.EventHandler(this.view_Clicked);
             // 
             // view352
             // 
             this.view352.AutoSize = true;
+            this.view352.ImageIndex = 352;
             this.view352.Location = new System.Drawing.Point(1532, 169);
             this.view352.Name = "view352";
             this.view352.Size = new System.Drawing.Size(61, 27);
@@ -191,7 +192,6 @@ namespace MS539___2021_07_07
             this.view352.TabStop = true;
             this.view352.Text = "1 YR";
             this.view352.UseVisualStyleBackColor = true;
-            this.view352.ImageIndex = 352;
             this.view352.Click += new System.EventHandler(this.view_Clicked);
             // 
             // label1
@@ -223,25 +223,6 @@ namespace MS539___2021_07_07
             this.SP500.UseVisualStyleBackColor = true;
             this.SP500.Click += new System.EventHandler(this.ref1_Clicked);
             // 
-            // low_price
-            // 
-            this.low_price.Appearance = System.Windows.Forms.Appearance.Button;
-            this.low_price.AutoSize = true;
-            this.low_price.BackColor = System.Drawing.Color.Red;
-            this.low_price.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.low_price.FlatAppearance.CheckedBackColor = System.Drawing.Color.Maroon;
-            this.low_price.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Maroon;
-            this.low_price.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.low_price.Location = new System.Drawing.Point(712, 163);
-            this.low_price.Name = "low_price";
-            this.low_price.Size = new System.Drawing.Size(88, 33);
-            this.low_price.TabIndex = 27;
-            this.low_price.Text = "     low     ";
-            this.low_price.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.low_price.UseVisualStyleBackColor = false;
-            this.low_price.ImageIndex = 0;
-            this.low_price.CheckedChanged += new System.EventHandler(this.price_Clicked);
-            // 
             // current_price
             // 
             this.current_price.Appearance = System.Windows.Forms.Appearance.Button;
@@ -252,14 +233,33 @@ namespace MS539___2021_07_07
             this.current_price.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.current_price.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.current_price.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.current_price.ImageIndex = 1;
             this.current_price.Location = new System.Drawing.Point(806, 163);
             this.current_price.Name = "current_price";
             this.current_price.Size = new System.Drawing.Size(84, 33);
             this.current_price.TabIndex = 26;
             this.current_price.Text = "current";
             this.current_price.UseVisualStyleBackColor = false;
-            this.current_price.ImageIndex = 1;
             this.current_price.CheckedChanged += new System.EventHandler(this.price_Clicked);
+            // 
+            // low_price
+            // 
+            this.low_price.Appearance = System.Windows.Forms.Appearance.Button;
+            this.low_price.AutoSize = true;
+            this.low_price.BackColor = System.Drawing.Color.Red;
+            this.low_price.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.low_price.FlatAppearance.CheckedBackColor = System.Drawing.Color.Maroon;
+            this.low_price.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Maroon;
+            this.low_price.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.low_price.ImageIndex = 0;
+            this.low_price.Location = new System.Drawing.Point(712, 163);
+            this.low_price.Name = "low_price";
+            this.low_price.Size = new System.Drawing.Size(88, 33);
+            this.low_price.TabIndex = 27;
+            this.low_price.Text = "     low     ";
+            this.low_price.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.low_price.UseVisualStyleBackColor = false;
+            this.low_price.CheckedChanged += new System.EventHandler(this.price_Clicked);
             // 
             // high_price
             // 
@@ -270,6 +270,7 @@ namespace MS539___2021_07_07
             this.high_price.FlatAppearance.CheckedBackColor = System.Drawing.Color.Green;
             this.high_price.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Green;
             this.high_price.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.high_price.ImageIndex = 2;
             this.high_price.Location = new System.Drawing.Point(896, 163);
             this.high_price.Name = "high_price";
             this.high_price.Size = new System.Drawing.Size(88, 33);
@@ -277,7 +278,6 @@ namespace MS539___2021_07_07
             this.high_price.Text = "    high    ";
             this.high_price.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.high_price.UseVisualStyleBackColor = false;
-            this.high_price.ImageIndex = 2;
             this.high_price.CheckedChanged += new System.EventHandler(this.price_Clicked);
             // 
             // StockPrice
@@ -285,14 +285,13 @@ namespace MS539___2021_07_07
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.ClientSize = new System.Drawing.Size(1676, 954);
+            this.ClientSize = new System.Drawing.Size(1676, 829);
             this.Controls.Add(this.high_price);
             this.Controls.Add(this.low_price);
             this.Controls.Add(this.current_price);
             this.Controls.Add(this.SP500);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.radioButton5);
             this.Controls.Add(this.view30);
             this.Controls.Add(this.view60);
             this.Controls.Add(this.view90);

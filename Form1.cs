@@ -190,11 +190,13 @@ namespace MS539___2021_07_07
         private List<List<Routines.StockEntry>> currentCollection;
         private Routines.StockLoader stockLoader;
 
-        private List<ScottPlot.Plottable.ScatterPlot> stockPlots = new List<ScottPlot.Plottable.ScatterPlot> { };
+        private List<ScottPlot.Plottable.ScatterPlot> stockPlots = new() { };
 
-        private List<ScottPlot.Plottable.ScatterPlot> stockReferencePlots = new List<ScottPlot.Plottable.ScatterPlot> { };
-        private List<List<Routines.StockReference>> stockReferenceData = new List<List<Routines.StockReference>> { };
+        private List<ScottPlot.Plottable.ScatterPlot> stockReferencePlots = new() { };
+        private List<List<Routines.StockReference>> stockReferenceData = new() { };
         private String[] refMap = new String[] { "sp500" };
+
+        private double priceNormalizer { get; set; } = 0;
 
         public int timeLimit { get; set; } = 30;
 
@@ -211,7 +213,6 @@ namespace MS539___2021_07_07
 
             // SP500
             this.stockReferenceData.Insert(0, this.stockLoader.loadReference("sp500"));
-            this.loadReference(0);
         }
 
         public void clear(bool skipRefs=false)
@@ -259,7 +260,7 @@ namespace MS539___2021_07_07
 
                 tickerList = streamReader.ReadToEnd().Split('\n');
             }
-            catch (DirectoryNotFoundException e)
+            catch (DirectoryNotFoundException)
             {
                 MessageBox.Show("Could not find the collection. Does it exist?");
 
@@ -293,29 +294,44 @@ namespace MS539___2021_07_07
                 //Debug.WriteLine(prices[i].toString());
                 ITER_PTR++;
             }
+            // setting normalizer value to current prices first index of selected time range
+            this.priceNormalizer = current[0];
+
+            Debug.WriteLine("PRICE NORMALIZER");
+            Debug.WriteLine(this.priceNormalizer);
+
             // low
-            var scatterLow = new ScottPlot.Plottable.ScatterPlot(dates, low);
-            scatterLow.Color = Color.Red;
-            scatterLow.MarkerSize = 10;
+            var scatterLow = new ScottPlot.Plottable.ScatterPlot(dates, low)
+            {
+                Color = Color.Red,
+                MarkerSize = 10
+            };
 
             stockPlots.Insert(0, scatterLow);
             if (enabledPlots[0]) { this.formPlot.Plot.Add(scatterLow); }
-            
+
             // current
-            var scatterCurrent = new ScottPlot.Plottable.ScatterPlot(dates, current);
-            scatterCurrent.Color = Color.Black;
-            scatterCurrent.MarkerSize = 10;
+            var scatterCurrent = new ScottPlot.Plottable.ScatterPlot(dates, current)
+            {
+                Color = Color.Black,
+                MarkerSize = 10
+            };
 
             stockPlots.Insert(1, scatterCurrent);
             if (enabledPlots[1]) { this.formPlot.Plot.Add(scatterCurrent); }
 
             // high
-            var scatterHigh = new ScottPlot.Plottable.ScatterPlot(dates, high);
-            scatterHigh.Color = Color.Green;
-            scatterHigh.MarkerSize = 10;
+            var scatterHigh = new ScottPlot.Plottable.ScatterPlot(dates, high)
+            {
+                Color = Color.Green,
+                MarkerSize = 10
+            };
 
             stockPlots.Insert(2, scatterHigh);
             if (enabledPlots[2]) { this.formPlot.Plot.Add(scatterHigh); }
+
+            // SP500 - deferred so we can normalize the values
+            this.loadReference(0);
         }
 
         private void loadReference(int refIndex)
@@ -327,19 +343,29 @@ namespace MS539___2021_07_07
             if (time > prices.Count) { ITER_PTR = 0; time = prices.Count; }
             else { ITER_PTR = prices.Count - time; }
 
+            Debug.WriteLine(float.Parse(prices[ITER_PTR].price, CultureInfo.InvariantCulture.NumberFormat));
+            // this value is used to keep reference data values closer to the selected tickers values
+            double priceModifier = this.priceNormalizer / float.Parse(prices[ITER_PTR].price, CultureInfo.InvariantCulture.NumberFormat);
+
+            Debug.WriteLine("PRICE MODIFIER");
+            Debug.WriteLine(priceModifier);
+
             double[] dates = new double[time];
             double[] price = new double[time];
             for (int i = 0; i < time; i++)
             {
                 dates[i] = DateTime.Parse(prices[ITER_PTR].date).ToOADate();
-                price[i] = float.Parse(prices[ITER_PTR].price, CultureInfo.InvariantCulture.NumberFormat);
+                price[i] = float.Parse(prices[ITER_PTR].price, CultureInfo.InvariantCulture.NumberFormat) * priceModifier;
 
                 Debug.WriteLine(price[i]);
+                ITER_PTR++;
             }
 
-            var scatterRef = new ScottPlot.Plottable.ScatterPlot(dates, price);
-            scatterRef.Color = Color.Blue;
-            scatterRef.MarkerSize = 5;
+            var scatterRef = new ScottPlot.Plottable.ScatterPlot(dates, price)
+            {
+                Color = Color.Blue,
+                MarkerSize = 5
+            };
 
             this.stockReferencePlots.Insert(0, scatterRef);
         }
